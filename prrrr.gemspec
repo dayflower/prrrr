@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
     bin/console
     bin/setup
     lib/prrrr.rb
+    lib/prrrr/repository.rb
     lib/prrrr/version.rb
     prrrr.gemspec
   ]
