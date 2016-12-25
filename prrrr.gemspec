@@ -33,6 +33,7 @@ Gem::Specification.new do |spec|
     lib/prrrr.rb
     lib/prrrr/repository.rb
     lib/prrrr/version.rb
+    lib/prrrr/web.rb
     prrrr.gemspec
   ]
   spec.bindir        = "exe"
@@ -40,6 +41,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "octokit"
+  spec.add_dependency "rack"
 
   spec.add_development_dependency "bundler", "~> 1.13"
   spec.add_development_dependency "rake", "~> 10.0"
