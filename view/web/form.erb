@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>form</title>
+</head>
+<body>
+	<form method="post">
+		<input type="hidden" name="step" value="form" />
+		<input type="hidden" name="base" value="<%= base %>" />
+		<input type="hidden" name="head" value="<%= head %>" />
+		<input type="text" name="title" value="<%= title %>" />
+		<textarea name="body"><%= body %></textarea>
+		<input type="submit" />
+	</form>
+</body>
+</html>
+<!-- # vi: set noet ts=2 sw=2 sts=0 : -->

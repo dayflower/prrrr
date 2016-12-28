@@ -1,39 +1,74 @@
 require "prrrr/repository"
-require "rack/request"
-require "rack/response"
-require "rack/static"
 require "octokit"
+require "sinatra/base"
+require "tilt"
+require "faraday"
 
 module Prrrr
-  module Web
-    STATIC_ROOT = File.expand_path("../../../static", __FILE__)
+  class Web < Sinatra::Application
+    set :root, File.expand_path("../../..", __FILE__)
+    set :public_folder, File.join(settings.root, "static")
+    set :views, File.join(settings.root, "/view")
+    set :erb, :escape_html => true
 
-    class App
-      def initialize(params = {})
+    helpers do
+      def send_static(file)
+        send_file File.expand_path(file, settings.public_folder)
       end
 
-      def call(env)
-        path = env["PATH_INFO"].dup
-        unless path.sub!(%r{\A /(\w+)/(\w+)/? }xmo, "")
-          throw RuntimeError.new
+      def octokit
+        unless @octokit
+          stack = Faraday::RackBuilder.new do |builder|
+            builder.response :logger
+            builder.use Octokit::Response::RaiseError
+            builder.adapter Faraday.default_adapter
+          end
+          Octokit.middleware = stack
+
+          @octokit = Octokit::Client.new(access_token: settings.global_token)
         end
 
-        user, repo = $1, $2
-
-        [ 200, [], [ "#{user}:#{repo}" ] ]
+        @octokit
       end
+
+      def repo(repo_name)
+        Prrrr::Repository.new(logger, octokit, repo_name)
+      end
+
     end
 
-    class Router
-      def initialize(params = {})
-        app = App.new()
-        @static_handler = Rack::Static.new(app, root: STATIC_ROOT,
-                                                urls: %w[ /js ])
-      end
+    set(:step) { |value| condition { request["step"] === value } }
 
-      def call(env)
-        @static_handler.call(env)
+    REPONAME_PATTERN = %r{([a-zA-Z0-9]\w+/\w+)}
+
+    get "/favicon.ico" do
+      halt 204
+    end
+
+    get %r{/#{REPONAME_PATTERN}} do |repo_name|
+      erb :'web/branches'
+    end
+
+    post %r{/#{REPONAME_PATTERN}}, :step => "branches" do |repo_name|
+      base, head = %w[ base head ].map { |k| request[k] }
+      pulls = repo(repo_name).pullreqs_for_release(base, head)
+      template = Tilt[:erb].new(File.join(settings.views, "text/pr.erb"))
+      content = template.render({}, :pulls => pulls )
+      title, body = content.split(/\n/, 2)
+      erb :'web/form', :locals => { :base => base, :head => head, :title => title, :body => body }
+    end
+
+    post %r{/#{REPONAME_PATTERN}}, :step => "form" do |repo_name|
+      base, head, title, body = %w[ base head title body ].map { |k| request[k] }
+
+      begin
+        res = repo(repo_name).create_pullreq(base, head, title, body)
+        erb :'web/created', :locals => { :res => res, :base => base, :head => head, :title => title, :body => body }
+      rescue Octokit::UnprocessableEntity => e
+        status 422
+        erb :'web/failed'
       end
+      #erb :'web/complete', :locals => {  }
     end
   end
 end
