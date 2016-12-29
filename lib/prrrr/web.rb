@@ -79,7 +79,12 @@ module Prrrr
 
     post %r{/#{REPONAME_PATTERN}}, :step => "repo" do |repo_name|
       base, head = %w[ base head ].map { |k| request[k] }
-      pulls = repo(repo_name).pullreqs_for_release(base, head)
+      begin
+        pulls = repo(repo_name).pullreqs_for_release(base, head)
+      rescue Prrrr::Repository::IllegalStateError => e
+        status 400
+        return erb :'web/error_bad_compare', :locals => { :repo_name => repo_name, :base => base, :head => head, :status => e.status }
+      end
       template = Tilt[:erb].new(File.join(settings.views, "text/pr.erb"))
       content = template.render({}, :pulls => pulls )
       title, body = content.split(/\n/, 2)
