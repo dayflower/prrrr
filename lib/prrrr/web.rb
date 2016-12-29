@@ -3,6 +3,7 @@ require "octokit"
 require "sinatra/base"
 require "tilt"
 require "faraday"
+require "json"
 
 module Prrrr
   class Web < Sinatra::Application
@@ -65,6 +66,11 @@ module Prrrr
       end
       status 404
       erb :'web/error_404', :locals => { :repo_name => repo_name }
+    end
+
+    get %r{/#{REPONAME_PATTERN}/branches} do |repo_name|
+      content_type :json
+      JSON.pretty_generate(repo(repo_name).branches(:reject_slash => !!request["reject_slash"]))
     end
 
     get %r{/#{REPONAME_PATTERN}} do |repo_name|

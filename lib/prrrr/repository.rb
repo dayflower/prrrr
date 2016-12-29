@@ -16,7 +16,7 @@ module Prrrr
         next if options[:reject_slash] && branch.name.include?("/")
         branches << branch.name
       end
-      branches
+      branches.sort
     end
 
     def open_pullreq_exists?(base, head)
