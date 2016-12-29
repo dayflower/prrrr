@@ -11,6 +11,8 @@ module Prrrr
     set :views, File.join(settings.root, "/view")
     set :erb, :escape_html => true
 
+    set :show_exceptions, :after_handler
+
     helpers do
       def send_static(file)
         send_file File.expand_path(file, settings.public_folder)
@@ -43,6 +45,16 @@ module Prrrr
 
     get "/favicon.ico" do
       halt 204
+    end
+
+    error Octokit::Unauthorized do
+      if request.path_info =~ %r{\A/#{REPONAME_PATTERN}}
+        repo_name = $1
+      else
+        repo_name = "(unknown)"
+      end
+      status 403
+      erb :'web/error_403', :locals => { :repo_name => repo_name }
     end
 
     get %r{/#{REPONAME_PATTERN}} do |repo_name|
