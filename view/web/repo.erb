@@ -5,10 +5,84 @@
 <body>
 	<form method="post">
 		<input type="hidden" name="step" value="repo" />
-		<input type="hidden" name="base" value="master" />
-		<input type="hidden" name="head" value="develop" />
+		<select id="sel-base" name="base" disabled="disabled"></select>
+		<select id="sel-head" name="head" disabled="disabled"></select>
 		<input type="submit" />
 	</form>
+	<script type="text/javascript">
+
+"use strict";
+(function (window, document) {
+	var $ = function (id) { return document.getElementById(id); };
+	var fetch = window.fetch;
+
+	function replace_options_of_select(el, values) {
+		var opts = [],
+			i, n;
+
+		n = values.length;
+		for (i = 0; i < n; i ++) {
+			var opt = document.createElement("option");
+			opt.value = values[i];
+			opt.text = opt.value;
+			opts[i] = opt;
+		}
+		el.innerHTML = "";		// clear
+		for (i = 0; i < n; i ++) {
+			el.add(opts[i]);
+		}
+	}
+
+	function on_branches_loaded(branches) {
+		var default_base = -1,
+			default_head = -1,
+			sel_base = $("sel-base"),
+			sel_head = $("sel-head");
+
+		/*
+		   TODO: set default_base / default_head from localStorage
+		 */
+
+		if (default_base < 0) {
+			default_base = branches.indexOf("master");
+		}
+		if (default_base < 0) {
+			default_base = branches.indexOf("staging");
+		}
+		if (default_base < 0) {
+			default_base = 0;
+		}
+
+		if (default_head < 0) {
+			default_head = branches.indexOf("develop");
+		}
+		if (default_head < 0) {
+			default_head = branches.indexOf("staging");
+		}
+		if (default_head < 0) {
+			default_head = (default_base == 0) ? 1 : 0;
+		}
+
+		replace_options_of_select(sel_base, branches);
+		sel_base.selectedIndex = default_base;
+		sel_base.disabled = false;
+
+		replace_options_of_select(sel_head, branches);
+		sel_head.selectedIndex = default_head;
+		sel_head.disabled = false;
+	}
+
+	function on_ready(ev) {
+		var url_branches = window.location + "/branches?reject_slash=1";
+		fetch(url_branches)
+			.then(function (res) { return res.json(); })
+			.then(on_branches_loaded);
+	}
+
+	document.addEventListener("DOMContentLoaded", on_ready, false);
+})(window, document);
+
+	</script>
 </body>
 </html>
-<!-- # vi: set noet ts=2 sw=2 sts=0 : -->
+<!-- # vi: set noet ts=4 sw=4 sts=0 : -->
