@@ -74,10 +74,10 @@ module Prrrr
     end
 
     get %r{/#{REPONAME_PATTERN}} do |repo_name|
-      erb :'web/branches'
+      erb :'web/repo'
     end
 
-    post %r{/#{REPONAME_PATTERN}}, :step => "branches" do |repo_name|
+    post %r{/#{REPONAME_PATTERN}}, :step => "repo" do |repo_name|
       base, head = %w[ base head ].map { |k| request[k] }
       pulls = repo(repo_name).pullreqs_for_release(base, head)
       template = Tilt[:erb].new(File.join(settings.views, "text/pr.erb"))
