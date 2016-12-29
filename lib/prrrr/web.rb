@@ -57,6 +57,16 @@ module Prrrr
       erb :'web/error_403', :locals => { :repo_name => repo_name }
     end
 
+    error Octokit::NotFound do
+      if request.path_info =~ %r{\A/#{REPONAME_PATTERN}}
+        repo_name = $1
+      else
+        repo_name = "(unknown)"
+      end
+      status 404
+      erb :'web/error_404', :locals => { :repo_name => repo_name }
+    end
+
     get %r{/#{REPONAME_PATTERN}} do |repo_name|
       erb :'web/branches'
     end
