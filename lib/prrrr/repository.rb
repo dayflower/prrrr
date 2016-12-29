@@ -1,6 +1,12 @@
 module Prrrr
   class Repository
     class IllegalStateError < StandardError
+      attr_reader :status
+
+      def initialize(message, status)
+        super(message)
+        @status = status
+      end
     end
 
     def initialize(logger, client, repo)
@@ -65,7 +71,7 @@ module Prrrr
       res = @client.compare(repo, base, head)
 
       if res[:status] != "ahead"
-        throw IllegalStateError.new("status is not ahead (#{res[:status]})")
+        raise IllegalStateError.new("status is not ahead (#{res[:status]})", res[:status])
       end
 
       base_sha = res[:merge_base_commit][:sha]
