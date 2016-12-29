@@ -9,6 +9,16 @@ module Prrrr
       @repo = repo
     end
 
+    def branches(options = {})
+      branches = []
+      res = @client.branches(@repo)
+      auto_paginate(res) do |branch|
+        next if options[:reject_slash] && branch.name.include?("/")
+        branches << branch.name
+      end
+      branches
+    end
+
     def open_pullreq_exists?(base, head)
       @logger.info "will fetch pull requests for #{@repo} into #{base} to #{head}"
       res = @client.pull_requests(@repo, state: 'open', base: base, head: head)
