@@ -15,6 +15,10 @@ module Prrrr
       @repo = repo
     end
 
+    def info(options = {})
+      @client.repository(@repo)
+    end
+
     def branches(options = {})
       branches = []
       res = @client.branches(@repo)
@@ -32,8 +36,10 @@ module Prrrr
     end
 
     def pullreqs_for_release(base, head)
-      merge_commits = pick_merge_commits(@repo, base, head)
-      pick_pullreqs(@repo, base, merge_commits)
+      res = pick_merge_commits(@repo, base, head)
+      pulls = pick_pullreqs(@repo, base, res[:merge_commits])
+      res[:pull_requests] = pulls
+      res
     end
 
     def create_pullreq(base, head, title, body = nil)
@@ -74,6 +80,8 @@ module Prrrr
         raise IllegalStateError.new("status is not ahead (#{res[:status]})", res[:status])
       end
 
+      head_commit = res[:commits][-1]
+
       base_sha = res[:merge_base_commit][:sha]
 
       last_sha = nil
@@ -92,8 +100,8 @@ module Prrrr
       if last_sha != base_sha
         @logger.info "the compared result contains more than 250 commits"
         @logger.info "will fetch commits of #{repo} from #{last_sha}"
-        res = @client.commits(repo, last_sha, per_page: 100)
-        auto_paginate(res) do |commit|
+        commits_res = @client.commits(repo, last_sha, per_page: 100)
+        auto_paginate(commits_res) do |commit|
           last_sha = commit[:sha]
           break if last_sha == base_sha
 
@@ -104,7 +112,11 @@ module Prrrr
         end
       end
 
-      commits
+      res[:commits] = []
+      res.to_h.merge({
+        :merge_commits => commits,
+        :head_commit => head_commit,
+      })
     end
 
     def auto_paginate(res)

@@ -1,18 +1,21 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	<title>form</title>
-</head>
-<body>
-	<form method="post">
-		<input type="hidden" name="step" value="form" />
-		<input type="hidden" name="base" value="<%= base %>" />
-		<input type="hidden" name="head" value="<%= head %>" />
-		<input type="text" name="title" value="<%= title %>" />
-		<textarea name="body"><%= body %></textarea>
-		<input type="submit" />
-	</form>
-</body>
-</html>
-<!-- # vi: set noet ts=2 sw=2 sts=0 : -->
+<div>
+    <p class="c-paragraph">
+        Pull-request includes
+        <%= diff[:total_commits] %> commits
+        <a href="<%= diff[:html_url] %>" target="_blank"><span class="c-code u-small"><%= diff[:base_commit][:sha][0,7] %>...<%= diff[:head_commit][:sha][0,7] %></span></a>
+        (<%= diff[:files].size %> files changed)
+    </p>
+    <div class="o-form-element">
+        <label for="text-title" class="c-label">Title:</label>
+        <input id="text-title" class="c-field" value="<%= title %>" />
+    </div>
+    <div class="o-form-element">
+        <label for="text-body" class="c-label">Comment:</label>
+        <textarea id="text-body" class="c-field" style="height: 12rem; min-height: 12rem;"><%= body %></textarea>
+    </div>
+    <div class="u-centered">
+        <button id="button-generate-pr" class="c-button c-button--info u-xlarge" style="margin-top: 2rem;">
+            Create Pull-Request
+        </button>
+    </div>
+</div>

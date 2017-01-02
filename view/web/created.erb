@@ -1,14 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	<meta http-equiv="Refresh" content="60; URL=<%= res.html_url %>" />
-	<title>created</title>
-</head>
-<body>
-	<div>
-		<a href="<%= res.html_url %>"><%= res.html_url %></a>
-	</div>
-</body>
-</html>
-<!-- # vi: set noet ts=2 sw=2 sts=0 : -->
+<p class="c-paragraph">Following pull request has been created.</p>
+<p class="c-paragraph c-text--mono u-centered"><a href="<%= res[:html_url] %>"><%= res[:html_url] %></a></p>
+<p class="c-paragraph u-small">Will be redirected in 5 sec.</p>
+<script type="text/javascript">
+    window.setTimeout(function () {
+        location.href = "<%= res[:html_url] %>";
+    }, 3000);
+</script>

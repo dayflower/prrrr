@@ -74,10 +74,13 @@ module Prrrr
     end
 
     get %r{/#{REPONAME_PATTERN}} do |repo_name|
-      erb :'web/repo'
+      erb :'web/repo', :locals => {
+        :repo_name => repo_name,
+        #:repo     => repo(repo_name).info,
+      }
     end
 
-    post %r{/#{REPONAME_PATTERN}}, :step => "repo" do |repo_name|
+    post %r{/#{REPONAME_PATTERN}/prepare} do |repo_name|
       base, head = %w[ base head ].map { |k| request[k] }
       begin
         pulls = repo(repo_name).pullreqs_for_release(base, head)
@@ -85,23 +88,25 @@ module Prrrr
         status 400
         return erb :'web/error_bad_compare', :locals => { :repo_name => repo_name, :base => base, :head => head, :status => e.status }
       end
+
       template = Tilt[:erb].new(File.join(settings.views, "text/pr.erb"))
-      content = template.render({}, :pulls => pulls )
+      content = template.render({}, :diff => pulls )
       title, body = content.split(/\n/, 2)
-      erb :'web/form', :locals => { :base => base, :head => head, :title => title, :body => body }
+
+      erb :'web/form', :locals => { :base => base, :head => head, :title => title, :body => body, :diff => pulls }
     end
 
-    post %r{/#{REPONAME_PATTERN}}, :step => "form" do |repo_name|
+    post %r{/#{REPONAME_PATTERN}/pr} do |repo_name|
       base, head, title, body = %w[ base head title body ].map { |k| request[k] }
 
       begin
         res = repo(repo_name).create_pullreq(base, head, title, body)
         erb :'web/created', :locals => { :res => res, :base => base, :head => head, :title => title, :body => body }
       rescue Octokit::UnprocessableEntity => e
+        logger.warn e.message
         status 422
-        erb :'web/failed'
+        erb :'web/failed', :locals => { :e => e }
       end
-      #erb :'web/complete', :locals => {  }
     end
   end
 end

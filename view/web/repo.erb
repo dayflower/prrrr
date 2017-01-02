@@ -1,88 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8" />
+    <title>Prrrr: <%= repo_name %></title>
+    <link rel="stylesheet" type="text/css" href="/css/blaze.min.css" />
+    <style type="text/css">
+.c-field--inline {
+    display: inline;
+    width: auto;
+}
+
+#div-form-pr-body {
+    opacity: 0.0;
+}
+#div-form-pr-body > div {
+    display: none;
+}
+#div-form-pr-body.visible {
+    opacity: 1.0;
+    transition-property: all;
+    transition-duration: 1s;
+}
+#div-form-pr-body.visible > div {
+    display: block;
+}
+    </style>
 </head>
-<body>
-	<form method="post">
-		<input type="hidden" name="step" value="repo" />
-		<select id="sel-base" name="base" disabled="disabled"></select>
-		<select id="sel-head" name="head" disabled="disabled"></select>
-		<input type="submit" />
-	</form>
-	<script type="text/javascript">
+<body data-repo-name="<%= repo_name %>" class="c-text">
+    <div class="o-container o-container--medium" style="margin-top: 4rem; margin-bottom: 4rem;">
+        <h1 class="c-heading">PR-R-R-R</h1>
 
-"use strict";
-(function (window, document) {
-	var $ = function (id) { return document.getElementById(id); };
-	var fetch = window.fetch;
+        <div id="div-error" style="display: none;" class="c-alert c-alert--error">
+            <button id="button-close-alert" class="c-button c-button--close">×</button>
+        </div>
+        <div id="div-selected-branch" class="u-large" style="display: none;">
+            Release
+            <span class="c-code"><%= repo_name %></span>
+            into <span id="text-base-branch" class="c-badge c-badge--default"></span>
+            from <span id="text-head-branch" class="c-badge c-badge--default"></span>
+            <button id="button-edit-branch" class="c-button c-button--ghost u-xsmall">Edit</button>
+        </div>
+        <div id="div-branch-selector" class="u-large" style="display: none;">
+            Release
+            <span class="c-code"><%= repo_name %></span>
+            into <select id="select-base-branches" class="c-field c-field--inline u-small"></select>
+            from <select id="select-head-branches" class="c-field c-field--inline u-small"></select>
+        </div>
+        <div id="div-generate-pr-body" class="u-centered" style="display: none;">
+            <button id="button-generate-pr-body" class="c-button c-button--info u-xlarge" style="margin-top: 2rem;">
+                Gather Pull-Requests
+            </button>
+        </div>
+        <div id="div-form-pr-body" style="display: none; margin-top: 1rem;"></div>
+        <div id="div-loading" class="u-center-block" style="display: none;">
+            <img src="/img/loading.gif" class="u-center-block__content u-center-block__content--horizontal" />
+        </div>
+        <div id="div-pr-created" style="display: none;"></div>
 
-	function replace_options_of_select(el, values) {
-		var opts = [],
-			i, n;
+    </div>
 
-		n = values.length;
-		for (i = 0; i < n; i ++) {
-			var opt = document.createElement("option");
-			opt.value = values[i];
-			opt.text = opt.value;
-			opts[i] = opt;
-		}
-		el.innerHTML = "";		// clear
-		for (i = 0; i < n; i ++) {
-			el.add(opts[i]);
-		}
-	}
-
-	function on_branches_loaded(branches) {
-		var default_base = -1,
-			default_head = -1,
-			sel_base = $("sel-base"),
-			sel_head = $("sel-head");
-
-		/*
-		   TODO: set default_base / default_head from localStorage
-		 */
-
-		if (default_base < 0) {
-			default_base = branches.indexOf("master");
-		}
-		if (default_base < 0) {
-			default_base = branches.indexOf("staging");
-		}
-		if (default_base < 0) {
-			default_base = 0;
-		}
-
-		if (default_head < 0) {
-			default_head = branches.indexOf("develop");
-		}
-		if (default_head < 0) {
-			default_head = branches.indexOf("staging");
-		}
-		if (default_head < 0) {
-			default_head = (default_base == 0) ? 1 : 0;
-		}
-
-		replace_options_of_select(sel_base, branches);
-		sel_base.selectedIndex = default_base;
-		sel_base.disabled = false;
-
-		replace_options_of_select(sel_head, branches);
-		sel_head.selectedIndex = default_head;
-		sel_head.disabled = false;
-	}
-
-	function on_ready(ev) {
-		var url_branches = window.location + "/branches?reject_slash=1";
-		fetch(url_branches)
-			.then(function (res) { return res.json(); })
-			.then(on_branches_loaded);
-	}
-
-	document.addEventListener("DOMContentLoaded", on_ready, false);
-})(window, document);
-
-	</script>
+    <script type="text/javascript" src="/js/main.js"></script>
 </body>
-</html>
-<!-- # vi: set noet ts=4 sw=4 sts=0 : -->
+
