@@ -45,6 +45,7 @@ Gem::Specification.new do |spec|
     view/web/error_bad_compare.erb
     view/web/failed.erb
     view/web/form.erb
+    view/web/index.erb
     view/web/login.erb
     view/web/repo.erb
     prrrr.gemspec

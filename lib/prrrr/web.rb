@@ -170,5 +170,9 @@ module Prrrr
     get "/favicon.ico" do
       halt 204
     end
+
+    get "/" do
+      erb :'web/index'
+    end
   end
 end
