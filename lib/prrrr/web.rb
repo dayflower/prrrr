@@ -25,6 +25,8 @@ module Prrrr
     set :github_client_id, ENV["GITHUB_CLIENT_ID"]
     set :github_client_secret, ENV["GITHUB_CLIENT_SECRET"]
     set :github_global_token, ENV["GITHUB_GLOBAL_TOKEN"]
+    set :github_api_endpoint, ENV["GITHUB_API_ENDPOINT"] || ENV["OCTOKIT_API_ENDPOINT"]
+    set :github_web_endpoint, ENV["GITHUB_WEB_ENDPOINT"] || ENV["OCTOKIT_WEB_ENDPOINT"]
 
     helpers Sinatra::Cookies
 
@@ -43,6 +45,9 @@ module Prrrr
             end
             Octokit.middleware = stack
           end
+
+          Octokit.api_endpoint = settings.github_api_endpoint unless settings.github_api_endpoint.nil?
+          Octokit.web_endpoint = settings.github_web_endpoint unless settings.github_web_endpoint.nil?
 
           # TODO raise when github_token is nil
           @octokit = Octokit::Client.new(access_token: github_token)
