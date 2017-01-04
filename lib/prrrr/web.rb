@@ -16,6 +16,8 @@ module Prrrr
 
     set :show_exceptions, :after_handler
 
+    set :pr_template, ENV["PR_TEMPLATE"] || File.join(settings.root, "text", "pr.erb")
+
     set :logging_octokit, false
     set :token_expires, 3600*24*7
     set :branch_regexp, %r{\A\w+\z}
@@ -124,7 +126,7 @@ module Prrrr
         return erb :error_bad_compare, :locals => { :repo_name => repo_name, :base => base, :head => head, :status => e.status }
       end
 
-      template = Tilt[:erb].new(File.join(settings.root, "text/pr.erb"))
+      template = Tilt[:erb].new(settings.pr_template)
       content = template.render({}, :diff => pulls )
       title, body = content.split(/\n/, 2)
 
