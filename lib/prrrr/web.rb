@@ -18,9 +18,13 @@ module Prrrr
     set :show_exceptions, :after_handler
 
     set :logging_octokit, false
-    set :global_token, nil
     set :token_expires, 3600*24*7
     set :branch_regexp, %r{\A\w+\z}
+    set :encryption_key, SecureRandom.urlsafe_base64(33)
+
+    set :github_client_id, ENV["GITHUB_CLIENT_ID"]
+    set :github_client_secret, ENV["GITHUB_CLIENT_SECRET"]
+    set :github_global_token, ENV["GITHUB_GLOBAL_TOKEN"]
 
     helpers Sinatra::Cookies
 
@@ -40,6 +44,7 @@ module Prrrr
             Octokit.middleware = stack
           end
 
+          # TODO raise when github_token is nil
           @octokit = Octokit::Client.new(access_token: github_token)
         end
 
@@ -64,7 +69,7 @@ module Prrrr
       end
 
       def github_token
-        @github_token ||= settings.global_token || parse_access_token("password", cookies[:access_token])
+        @github_token ||= settings.github_global_token || parse_access_token(settings.encryption_key, cookies[:access_token])
       end
     end
 
@@ -95,9 +100,9 @@ module Prrrr
         halt 403
       end
 
-      res = Octokit.exchange_code_for_token(request["code"], ENV["GITHUB_CLIENT_ID"], ENV["GITHUB_CLIENT_SECRET"])
+      res = Octokit.exchange_code_for_token(request["code"], settings.github_client_id, settings.github_client_secret)
 
-      cookies[:access_token] = create_access_token("password", res.access_token)
+      cookies[:access_token] = create_access_token(settings.encryption_key, res.access_token)
       redirect "/" + repo_name
     end
 
@@ -139,10 +144,16 @@ module Prrrr
       if github_token.nil?
         state = SecureRandom.uuid
         next_url = url("/#{repo_name}/auth")
-        params = URI.encode_www_form({ client_id: ENV["GITHUB_CLIENT_ID"], redirect_uri: next_url, state: state, allow_signup: false, scope: "repo" })
-        redir = URI.join("https://github.com/", "login/oauth/authorize", "?" + params)
+        params = URI.encode_www_form({
+          client_id: settings.github_client_id,
+          redirect_uri: next_url,
+          state: state,
+          allow_signup: false,
+          scope: "repo"
+        })
+        github_login_url = URI.join("https://github.com/", "login/oauth/authorize", "?" + params)
         cookies[:oauth2_state] = state
-        erb :'web/login', :locals => { :repo_name => repo_name, :github_login_url => redir.to_s }
+        erb :'web/login', :locals => { :repo_name => repo_name, :github_login_url => github_login_url.to_s }
       else
         erb :'web/repo', :locals => {
           :repo_name => repo_name,

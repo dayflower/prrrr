@@ -36,7 +36,11 @@ module Prrrr
         cipher.auth_data = ''
         cipher.auth_tag = tag
 
-        decrypted = cipher.update(encrypted) + cipher.final
+        begin
+          decrypted = cipher.update(encrypted) + cipher.final
+        rescue OpenSSL::Cipher::CipherError
+          return nil
+        end
 
         JSON.parse(decrypted.dup.force_encoding('UTF-8'), symbolize_names: true)
       end
