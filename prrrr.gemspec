@@ -37,16 +37,16 @@ Gem::Specification.new do |spec|
     lib/prrrr/web.rb
     static/img/loading.gif
     static/js/main.js
-    view/text/pr.erb
-    view/web/created.erb
-    view/web/error_403.erb
-    view/web/error_404.erb
-    view/web/error_bad_compare.erb
-    view/web/failed.erb
-    view/web/form.erb
-    view/web/index.erb
-    view/web/login.erb
-    view/web/repo.erb
+    text/pr.erb
+    views/created.erb
+    views/error_403.erb
+    views/error_404.erb
+    views/error_bad_compare.erb
+    views/failed.erb
+    views/form.erb
+    views/index.erb
+    views/login.erb
+    views/repo.erb
     prrrr.gemspec
   ]
   spec.bindir        = "exe"

@@ -12,7 +12,6 @@ module Prrrr
   class Web < Sinatra::Application
     set :root, File.expand_path("../../..", __FILE__)
     set :public_folder, File.join(settings.root, "static")
-    set :views, File.join(settings.root, "/view")
     set :erb, :escape_html => true
 
     set :show_exceptions, :after_handler
@@ -87,7 +86,7 @@ module Prrrr
         repo_name = "(unknown)"
       end
       status 403
-      erb :'web/error_403', :locals => { :repo_name => repo_name }
+      erb :error_403, :locals => { :repo_name => repo_name }
     end
 
     error Octokit::NotFound do
@@ -97,7 +96,7 @@ module Prrrr
         repo_name = "(unknown)"
       end
       status 404
-      erb :'web/error_404', :locals => { :repo_name => repo_name }
+      erb :error_404, :locals => { :repo_name => repo_name }
     end
 
     get %r{/#{REPONAME_PATTERN}/auth} do |repo_name|
@@ -122,14 +121,14 @@ module Prrrr
         pulls = repo(repo_name).pullreqs_for_release(base, head)
       rescue Prrrr::Repository::IllegalStateError => e
         status 400
-        return erb :'web/error_bad_compare', :locals => { :repo_name => repo_name, :base => base, :head => head, :status => e.status }
+        return erb :error_bad_compare, :locals => { :repo_name => repo_name, :base => base, :head => head, :status => e.status }
       end
 
-      template = Tilt[:erb].new(File.join(settings.views, "text/pr.erb"))
+      template = Tilt[:erb].new(File.join(settings.root, "text/pr.erb"))
       content = template.render({}, :diff => pulls )
       title, body = content.split(/\n/, 2)
 
-      erb :'web/form', :locals => { :base => base, :head => head, :title => title, :body => body, :diff => pulls }
+      erb :form, :locals => { :base => base, :head => head, :title => title, :body => body, :diff => pulls }
     end
 
     post %r{/#{REPONAME_PATTERN}/pr} do |repo_name|
@@ -137,11 +136,11 @@ module Prrrr
 
       begin
         res = repo(repo_name).create_pullreq(base, head, title, body)
-        erb :'web/created', :locals => { :res => res, :base => base, :head => head, :title => title, :body => body }
+        erb :created, :locals => { :res => res, :base => base, :head => head, :title => title, :body => body }
       rescue Octokit::UnprocessableEntity => e
         logger.warn e.message
         status 422
-        erb :'web/failed', :locals => { :e => e }
+        erb :failed, :locals => { :e => e }
       end
     end
 
@@ -158,9 +157,9 @@ module Prrrr
         })
         github_login_url = URI.join("https://github.com/", "login/oauth/authorize", "?" + params)
         cookies[:oauth2_state] = state
-        erb :'web/login', :locals => { :repo_name => repo_name, :github_login_url => github_login_url.to_s }
+        erb :login, :locals => { :repo_name => repo_name, :github_login_url => github_login_url.to_s }
       else
-        erb :'web/repo', :locals => {
+        erb :repo, :locals => {
           :repo_name => repo_name,
           #:repo     => repo(repo_name).info,
         }
@@ -172,7 +171,7 @@ module Prrrr
     end
 
     get "/" do
-      erb :'web/index'
+      erb :index
     end
   end
 end
