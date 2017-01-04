@@ -17,6 +17,7 @@ module Prrrr
 
     set :show_exceptions, :after_handler
 
+    set :logging_octokit, false
     set :global_token, nil
 
     helpers Sinatra::Cookies
@@ -28,12 +29,14 @@ module Prrrr
 
       def octokit
         unless @octokit
-          stack = Faraday::RackBuilder.new do |builder|
-            builder.response :logger
-            builder.use Octokit::Response::RaiseError
-            builder.adapter Faraday.default_adapter
+          if settings.logging_octokit
+            stack = Faraday::RackBuilder.new do |builder|
+              builder.response :logger
+              builder.use Octokit::Response::RaiseError
+              builder.adapter Faraday.default_adapter
+            end
+            Octokit.middleware = stack
           end
-          Octokit.middleware = stack
 
           @octokit = Octokit::Client.new(access_token: github_token)
         end
@@ -91,7 +94,6 @@ module Prrrr
       end
 
       res = Octokit.exchange_code_for_token(request["code"], ENV["GITHUB_CLIENT_ID"], ENV["GITHUB_CLIENT_SECRET"])
-      logger.info res
 
       cookies[:access_token] = create_access_token("password", res.access_token)
       redirect "/" + repo_name
