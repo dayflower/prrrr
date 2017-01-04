@@ -32,6 +32,7 @@ Gem::Specification.new do |spec|
     bin/setup
     lib/prrrr.rb
     lib/prrrr/repository.rb
+    lib/prrrr/util.rb
     lib/prrrr/version.rb
     lib/prrrr/web.rb
     static/css/blaze.min.css
@@ -44,6 +45,7 @@ Gem::Specification.new do |spec|
     view/web/error_bad_compare.erb
     view/web/failed.erb
     view/web/form.erb
+    view/web/login.erb
     view/web/repo.erb
     prrrr.gemspec
   ]
@@ -53,6 +55,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "octokit"
   spec.add_dependency "sinatra"
+  spec.add_dependency "sinatra-contrib"
   spec.add_dependency "erubis"
 
   spec.add_development_dependency "bundler", "~> 1.13"
