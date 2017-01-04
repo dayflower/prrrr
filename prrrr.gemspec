@@ -41,6 +41,7 @@ Gem::Specification.new do |spec|
     views/created.erb
     views/error_403.erb
     views/error_404.erb
+    views/error_already_exists.erb
     views/error_bad_compare.erb
     views/failed.erb
     views/form.erb

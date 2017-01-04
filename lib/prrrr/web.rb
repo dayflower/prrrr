@@ -119,8 +119,15 @@ module Prrrr
 
     post %r{/#{REPONAME_PATTERN}/prepare} do |repo_name|
       base, head = %w[ base head ].map { |k| request[k] }
+      repo = repo(repo_name)
+
+      if repo.open_pullreq_exists?(base, head)
+        status 422
+        return erb :error_already_exists, :locals => { :repo_name => repo_name, :base => base, :head => head }
+      end
+
       begin
-        pulls = repo(repo_name).pullreqs_for_release(base, head)
+        pulls = repo.pullreqs_for_release(base, head)
       rescue Prrrr::Repository::IllegalStateError => e
         status 400
         return erb :error_bad_compare, :locals => { :repo_name => repo_name, :base => base, :head => head, :status => e.status }
@@ -135,9 +142,15 @@ module Prrrr
 
     post %r{/#{REPONAME_PATTERN}/pr} do |repo_name|
       base, head, title, body = %w[ base head title body ].map { |k| request[k] }
+      repo = repo(repo_name)
+
+      if repo.open_pullreq_exists?(base, head)
+        status 422
+        return erb :error_already_exists, :locals => { :repo_name => repo_name, :base => base, :head => head }
+      end
 
       begin
-        res = repo(repo_name).create_pullreq(base, head, title, body)
+        res = repo.create_pullreq(base, head, title, body)
         erb :created, :locals => { :res => res, :base => base, :head => head, :title => title, :body => body }
       rescue Octokit::UnprocessableEntity => e
         logger.warn e.message
