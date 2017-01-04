@@ -19,11 +19,11 @@ module Prrrr
       @client.repository(@repo)
     end
 
-    def branches(options = {})
+    def branches(regexp = %r{})
       branches = []
       res = @client.branches(@repo)
       auto_paginate(res) do |branch|
-        next if options[:reject_slash] && branch.name.include?("/")
+        next unless branch.name =~ regexp
         branches << branch.name
       end
       branches.sort

@@ -20,6 +20,7 @@ module Prrrr
     set :logging_octokit, false
     set :global_token, nil
     set :token_expires, 3600*24*7
+    set :branch_regexp, %r{\A\w+\z}
 
     helpers Sinatra::Cookies
 
@@ -102,7 +103,7 @@ module Prrrr
 
     get %r{/#{REPONAME_PATTERN}/branches} do |repo_name|
       content_type :json
-      JSON.pretty_generate(repo(repo_name).branches(:reject_slash => !!request["reject_slash"]))
+      JSON.pretty_generate(repo(repo_name).branches(settings.branch_regexp))
     end
 
     post %r{/#{REPONAME_PATTERN}/prepare} do |repo_name|

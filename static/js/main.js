@@ -135,7 +135,7 @@ var App = {
 
         $("button-generate-pr-body").disabled = true;
 
-        fetchJson("/" + this.repoName + "/branches?reject_slash=1").then(function (branches) {
+        fetchJson("/" + this.repoName + "/branches").then(function (branches) {
             var selectBaseBranches = $("select-base-branches"),
                 selectHeadBranches = $("select-head-branches"),
                 defaultBases = [
