@@ -19,6 +19,7 @@ module Prrrr
 
     set :logging_octokit, false
     set :global_token, nil
+    set :token_expires, 3600*24*7
 
     helpers Sinatra::Cookies
 
@@ -55,7 +56,7 @@ module Prrrr
       def parse_access_token(password, token)
         o = Prrrr::Util.decrypt(password, token)
         return nil if o.nil?
-        if o[:issued] + 60 < Time.now.to_i
+        if o[:issued] + settings.token_expires < Time.now.to_i
           return nil
         end
         o[:token]
