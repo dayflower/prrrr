@@ -35,7 +35,6 @@ Gem::Specification.new do |spec|
     lib/prrrr/util.rb
     lib/prrrr/version.rb
     lib/prrrr/web.rb
-    static/css/blaze.min.css
     static/img/loading.gif
     static/js/main.js
     view/text/pr.erb
