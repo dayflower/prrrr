@@ -13,16 +13,10 @@
 #div-form-pr-body {
     opacity: 0.0;
 }
-#div-form-pr-body > div {
-    display: none;
-}
 #div-form-pr-body.visible {
     opacity: 1.0;
     transition-property: all;
     transition-duration: 1s;
-}
-#div-form-pr-body.visible > div {
-    display: block;
 }
     </style>
 </head>
@@ -51,7 +45,7 @@
                 Gather Pull-Requests
             </button>
         </div>
-        <div id="div-form-pr-body" style="display: none; margin-top: 1rem;"></div>
+        <div id="div-form-pr-body" style="margin-top: 1rem;"></div>
         <div id="div-loading" class="u-center-block" style="display: none;">
             <img src="/img/loading.gif" class="u-center-block__content u-center-block__content--horizontal" />
         </div>
