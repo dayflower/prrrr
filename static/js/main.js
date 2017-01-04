@@ -64,7 +64,8 @@ function postHtml(url, contents) {
     }, contents);
     var postOption = {
             method: "POST",
-            body: formData
+            body: formData,
+            credentials: "include"
         };
     return fetchHtml(url, postOption);
 }
@@ -135,7 +136,7 @@ var App = {
 
         $("button-generate-pr-body").disabled = true;
 
-        fetchJson("/" + this.repoName + "/branches").then(function (branches) {
+        fetchJson("/" + this.repoName + "/branches", { credentials: "include" }).then(function (branches) {
             var selectBaseBranches = $("select-base-branches"),
                 selectHeadBranches = $("select-head-branches"),
                 defaultBases = [
