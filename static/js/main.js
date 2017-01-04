@@ -206,6 +206,7 @@ var App = {
         this.saveBranchesToStorage();
 
         this.showLoading();
+        this.hideError();
 
         postHtml("/" + this.repoName + "/prepare", postData).then(function (contents) {
             $("div-form-pr-body").innerHTML = contents;
@@ -223,6 +224,11 @@ var App = {
             $("div-form-pr-body").className = "visible";
         }, function (error) {
             self.showError(error);
+
+            $("button-generate-pr-body").disabled = false;
+            $("select-base-branches").disabled = false;
+            $("select-head-branches").disabled = false;
+            $("button-edit-branch").disabled = false;
         });
     },
 
