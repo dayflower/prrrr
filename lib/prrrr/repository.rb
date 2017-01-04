@@ -30,8 +30,9 @@ module Prrrr
     end
 
     def open_pullreq_exists?(base, head)
-      @logger.info "will fetch pull requests for #{@repo} into #{base} to #{head}"
-      res = @client.pull_requests(@repo, state: 'open', base: base, head: head)
+      @logger.info "will fetch pull requests for #{@repo} into #{base} from #{head}"
+      user, _ = @repo.split("/", 2)
+      res = @client.pull_requests(@repo, state: 'open', base: base, head: "#{user}:#{head}")
       res.length > 0
     end
 
