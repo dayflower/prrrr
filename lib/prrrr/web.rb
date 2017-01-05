@@ -170,7 +170,8 @@ module Prrrr
           allow_signup: false,
           scope: "repo"
         })
-        github_login_url = URI.join("https://github.com/", "login/oauth/authorize", "?" + params)
+        Octokit.web_endpoint = settings.github_web_endpoint unless settings.github_web_endpoint.nil?
+        github_login_url = URI.join(Octokit.web_endpoint, "/login/oauth/authorize", "?" + params)
         cookies[:oauth2_state] = state
         erb :login, :locals => { :repo_name => repo_name, :github_login_url => github_login_url.to_s }
       else
