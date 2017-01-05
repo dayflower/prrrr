@@ -1,6 +1,6 @@
 <div>
     <p class="c-paragraph">
-        Pull-request includes
+        Release will include
         <%= diff[:total_commits] %> commits
         <a href="<%= diff[:html_url] %>" target="_blank"><span class="c-code u-small"><%= diff[:base_commit][:sha][0,7] %>...<%= diff[:head_commit][:sha][0,7] %></span></a>
         (<%= diff[:files].size %> files changed)
