@@ -79,7 +79,7 @@ module Prrrr
       end
     end
 
-    REPONAME_PATTERN = %r{([a-zA-Z0-9]\w+/\w+)}
+    REPONAME_PATTERN = %r{([a-zA-Z0-9][-\w]+/[-\w]+)}
 
     error Octokit::Unauthorized do
       if request.path_info =~ %r{\A/#{REPONAME_PATTERN}}
