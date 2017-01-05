@@ -83,37 +83,26 @@ module Prrrr
 
       head_commit = res[:commits][-1]
 
-      base_sha = res[:merge_base_commit][:sha]
-
-      last_sha = nil
       res[:commits].reverse.each do |commit|
-        last_sha = commit[:sha]
+        sha = commit[:sha]
 
         if commit[:parents].length >= 2
-          if last_sha != base_sha
-            @logger.info "#{last_sha} is merge commit"
-            commits << last_sha
-          end
+          @logger.info "#{sha} is merge commit"
+          commits << sha
         end
       end
 
       # compare API returns max 250 commits only
-      if last_sha != base_sha
-        @logger.info "the compared result contains more than 250 commits"
-        @logger.info "will fetch commits of #{repo} from #{last_sha}"
-        commits_res = @client.commits(repo, last_sha, per_page: 100)
-        auto_paginate(commits_res) do |commit|
-          last_sha = commit[:sha]
-          break if last_sha == base_sha
-
-          if commit[:parents].length >= 2
-            @logger.info "#{last_sha} is merge commit"
-            commits << last_sha
-          end
-        end
+      if res[:total_commits] > 250
+        @logger.warn "the compared result contains more than 250 commits"
       end
 
+      # shrink result size
       res[:commits] = []
+      res[:files].each do |file|
+        file[:patch] = nil
+      end
+
       res.to_h.merge({
         :merge_commits => commits,
         :head_commit => head_commit,
