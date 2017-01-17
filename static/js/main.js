@@ -65,7 +65,10 @@ function postHtml(url, contents) {
     var postOption = {
             method: "POST",
             body: formData,
-            credentials: "include"
+            credentials: "include",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
         };
     return fetchHtml(url, postOption);
 }

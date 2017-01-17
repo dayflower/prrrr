@@ -2,6 +2,8 @@ require "prrrr/repository"
 require "octokit"
 require "sinatra/base"
 require "sinatra/cookies"
+require "rack/protection"
+require "rack/builder"
 require "tilt"
 require "faraday"
 require "json"
@@ -188,6 +190,20 @@ module Prrrr
 
     get "/" do
       erb :index
+    end
+
+    class Protection < Rack::Protection::Base
+      def accepts?(env)
+        safe?(env) || env["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
+      end
+    end
+
+    Safe = Rack::Builder.new do
+      use Rack::Protection::FrameOptions
+      use Rack::Protection::HttpOrigin
+      use Prrrr::Web::Protection
+      use Rack::Protection::XSSHeader
+      run Prrrr::Web
     end
   end
 end
